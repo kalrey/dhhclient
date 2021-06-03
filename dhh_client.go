@@ -468,7 +468,7 @@ func (this *DHHClient) getCommonLoginInfo() url.Values {
 	commonLoginInfo := url.Values{
 		"screenPixel":      {"1440*900"},
 		"umidGetStatusVal": {"255"},
-		"ua":               {"140#RosDzikfzzPEDzo225PuApSob1119NSvDpym194Jyz1m0Cfa4zW7H751DF7jRRZubAlVvodQaHjVnRThOf8+LFpblp1zz/UaXsynZbzx+2Koa6Jjzzrb22U3lp1xzWGUV2VjUQDa2Dc3V3pWdQ+V2bTgl3TDqx3ZNjLLMZ2aMXKkLIxrHf9MS+eBwbozrDyUC1DSerYucTMICwVZKB12LqSDBEUxrHnR7i3UQRhVQTiRTuvs+qhlZ+CQ3QBkhUDTkP9T7AuNWcjXeeuGsHKu34giH8TucSVjKvfM/7eFHJHCN/1rMbqr3rzawy5gqTHs06LWNMAniHyPGKq+szfa98sGVvyuLT7kw2ckOQF1buku/NUdDMT9adEe7+n6DTAGiWz1FtayBHqTGKQ4+KirrDnOW+Wt8K5WXlnGVdg9IxaFwQE706EO9I1LjwhaY312l23iRc0Gpyq5PD1N7t9UyIVZ+BqVdGSP/bz9n0mzWqc3RslDPC7aq+zzLiCZusD17+udKsnvRciRqIvqSWfNot4ukgeeBO0JASmdO51+Fh6S3Bq6QbAIPak2efKV9jmYK4R94Rn+ANbT4IMdQtIruyH47LWwg2I3aadwz2eJ9C/G6IEWY1skeZSTzhvWXueZuH/gUuACOxC0uDEsqTxJtiokK0QIlpb8ID8dmEtACALdccL3Q2XSojwaNPgZGDM2d6FjEDUoo3d9i3/xC/8P4FCEy4ExWeg2ZclTGTb+jy3zvUQJoek6Ym0FJuq5PAqnA3SB3ND48JD6qldBIT5eJEfZ4Dpn86In5emsCv8mCJCvOK7FbZR1PAPpdM8et1DaVbQkeJAXq8OWLSfnhPt9zzugqlkU5Y4kIejNWPLx+V8aL/9naKHWReX1Cdbr72A71vfBP9Exi+L6zuaD6QZYxnfoQpF8cby1WBnZhqDmHHDD/u8evS3L4UIBSYsWDo/vjJdr3gtCc64wLqg1sFeKmsbPc8INPOYsVrMSD8W9uLzxep0RTqnpyx6kLTyaj+K64pGUmPw01oDNac2hZLyi"},
+		"ua":               {this.ua},
 		"navUserAgent":     {"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"},
 		"navPlatform":      {"MacIntel"}}
 
