@@ -95,6 +95,12 @@ const (
 	DHH_QUERY_APPLYADSPACE_FORM_DELIVERYTYPE        = "deliveryType"
 	DHH_QUERY_APPLYADSPACE_FORM_CSRF                = "_csrf"
 
+	DHH_API_ENDPOINT_ADSPACES        = "https://dahanghai.taobao.com/polystar/api/channel/mgmt/adSpaces"
+	DHH_QUERY_ADSPACES_FORM_STATUS   = "status"
+	DHH_QUERY_ADSPACES_FORM_PAGE     = "page"
+	DHH_QUERY_ADSPACES_FORM_PAGESIZE = "pageSize"
+	DHH_QUERY_ADSPACES_FORM_CSRF     = "_csrf"
+
 	DHH_API_ENDPOINT_BIZFILES = "https://dahanghai.taobao.com/polystar/api/biz_files"
 )
 
@@ -193,6 +199,28 @@ type CommonItemResponseJson struct {
 	Code       int          `json:"code"`
 	Message    string       `json:"message"`
 	Data       *BizFileData `json:"data"`
+}
+
+type CommonResponseJson struct {
+	Successful bool             `json:"successful"`
+	Code       int              `json:"code"`
+	Message    string           `json:"message"`
+	Data       *json.RawMessage `json:"data"`
+}
+
+type CommonDataJson struct {
+	Successful bool               `json:"successful"`
+	Code       int                `json:"code"`
+	Page       int                `json:"page"`
+	PageSize   int                `json:"pageSize"`
+	Total      int                `json:"total"`
+	List       []*json.RawMessage `json:"list"`
+}
+
+type AdSpaceJson struct {
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+	Status int    `json:"status"`
 }
 
 type DHHError struct {
@@ -771,6 +799,81 @@ func (this *DHHClient) QueryMaterialInfo(taskId string, materialId string, pageN
 		return content, respJson.Page, respJson.Total, nil
 	}
 	return "", 0, 0, NewError(DHH_ERROR_CODE_UNKNOWN, "QueryMaterialInfo Response unknown error, resp data: "+string(data))
+}
+
+func (this *DHHClient) ListAdSpaces(status int, pageNum int, pageSize int, prefix string) (string, int, int, *DHHError) {
+	form := url.Values{
+		DHH_QUERY_ADSPACES_FORM_STATUS:   {strconv.Itoa(status)},
+		DHH_QUERY_ADSPACES_FORM_CSRF:     {this.csrf},
+		DHH_QUERY_ADSPACES_FORM_PAGE:     {strconv.Itoa(pageNum)},
+		DHH_QUERY_ADSPACES_FORM_PAGESIZE: {strconv.Itoa(pageSize)}}
+
+	url := DHH_API_ENDPOINT_ADSPACES
+
+	bodyReader := strings.NewReader(form.Encode())
+
+	req, _ := http.NewRequest("POST", url, bodyReader)
+
+	req.Header.Add("Connection", "keep-alive")
+	req.Header.Add("x-xsrf-token", this.csrf)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("sec-fetch-site", "same-origin")
+	for _, v := range this.cookies {
+		req.AddCookie(v)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		zlog.Logger.Warn(err.Error())
+		return "", 0, 0, NewError(DHH_ERROR_CODE_HTTPERROR, err.Error())
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		zlog.Logger.Warn(resp.Status)
+		return "", 0, 0, NewError(DHH_ERROR_CODE_HTTPNOTOK, "ListAdSpaces response status("+resp.Status+"), url: "+url)
+	}
+
+	var respJson CommonResponseJson
+
+	data, err2 := ioutil.ReadAll(resp.Body)
+	if err2 != nil {
+		zlog.Logger.Warn(err2.Error())
+		return "", 0, 0, NewError(DHH_ERROR_CODE_HTTPRESP_READERR, err2.Error())
+	}
+
+	if err = json.Unmarshal(data, &respJson); err != nil {
+		zlog.Logger.Error("ListAdSpaces Response Unmarshal error, resp data: " + string(data))
+		return "", 0, 0, NewError(DHH_ERROR_CODE_JSONUNMARSHAL, "ListAdSpaces Response Unmarshal error, resp data: "+string(data))
+	}
+
+	if respJson.Successful && (respJson.Data != nil) {
+		var commonDataJson CommonDataJson
+		if err2 := json.Unmarshal(*respJson.Data, &commonDataJson); err2 != nil {
+			zlog.Logger.Error("ListAdSpaces Response Unmarshal error, resp data: " + string(data))
+			return "", 0, 0, NewError(DHH_ERROR_CODE_JSONUNMARSHAL, "ListAdSpaces Response Unmarshal error, resp data: "+string(data))
+		}
+
+		if commonDataJson.Successful && (commonDataJson.List != nil) {
+			content := ""
+			for _, item := range commonDataJson.List {
+				var adspaceJson AdSpaceJson
+
+				if err3 := json.Unmarshal(*item, &adspaceJson); err3 != nil {
+					zlog.Logger.Error("ListAdSpaces Response Unmarshal error, resp data: " + string(data))
+					return "", 0, 0, NewError(DHH_ERROR_CODE_JSONUNMARSHAL, "ListAdSpaces Response Unmarshal error, resp data: "+string(data))
+				}
+
+				if len(prefix) == 0 || strings.HasPrefix(adspaceJson.Name, prefix) {
+					line := strconv.Itoa(adspaceJson.Id) + "\t" + adspaceJson.Name + "\t" + strconv.Itoa(adspaceJson.Status)
+					content += line + "\n"
+				}
+			}
+			return content, commonDataJson.Page, commonDataJson.Total, nil
+		}
+
+	}
+	return "", 0, 0, NewError(DHH_ERROR_CODE_UNKNOWN, "ListAdSpaces Response unknown error, resp data: "+string(data))
 }
 
 func (this *DHHClient) applyAdSpace(adSpaceName string, deliveryApp string, deliveryAddress string, effectExampleFileId int, effectExampleUrl string) *DHHError {

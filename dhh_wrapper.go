@@ -50,6 +50,30 @@ func (this *DHHWrapper) AddAdSpaces(deliveryAppFileName string, adnameFile strin
 		adnameFile)
 }
 
+func (this *DHHWrapper) ListAdSpaces(status int, prefix string) (string, *DHHError) {
+	fileContent := ""
+
+	pageSize := 100
+	pageNum := 1
+
+	for {
+		content, curNum, total, err := this.client.ListAdSpaces(status, pageNum, pageSize, prefix)
+
+		if err != nil {
+			return "", err
+		}
+
+		fileContent += content
+
+		if curNum*pageSize >= total {
+			break
+		}
+
+		pageNum = curNum + 1
+	}
+	return fileContent, nil
+}
+
 func (this *DHHWrapper) GetTaskUrls(taskId string, prefixFilter string) *DHHError {
 	materialId, err := this.client.QueryTaskMaterial(taskId, 1, 10)
 
