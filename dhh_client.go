@@ -833,6 +833,16 @@ func (this *DHHClient) applyAdSpace(adSpaceName string, deliveryApp string, deli
 	}
 }
 
+func (this *DHHClient) AddAdspace(deliveryApp string, deliveryAddress string, deliveryAppFileName string, adName string) *DHHError {
+	errBiz, fileId, fileUrl := this.bizFile(deliveryAppFileName)
+
+	if errBiz != nil {
+		return errBiz
+	}
+
+	return this.applyAdSpace(adName, deliveryApp, deliveryAddress, fileId, fileUrl)
+}
+
 func (this *DHHClient) BatchAdSpace(deliveryApp string, deliveryAddress string, deliveryAppFileName string, adNameFile string) *DHHError {
 
 	errBiz, fileId, fileUrl := this.bizFile(deliveryAppFileName)

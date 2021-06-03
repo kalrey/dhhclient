@@ -36,6 +36,13 @@ func NewDHHWrapper(channelId string, loginId string, password string, ua string)
 	return &DHHWrapper{client}, nil
 }
 
+func (this *DHHWrapper) AddAdSpace(deliveryAppFileName string, adname string) *DHHError {
+	return this.client.AddAdspace("讯飞输入法",
+		"https://sj.qq.com/myapp/detail.htm?apkName=com.iflytek.inputmethod",
+		deliveryAppFileName,
+		adname)
+}
+
 func (this *DHHWrapper) AddAdSpaces(deliveryAppFileName string, adnameFile string) *DHHError {
 	return this.client.BatchAdSpace("讯飞输入法",
 		"https://sj.qq.com/myapp/detail.htm?apkName=com.iflytek.inputmethod",
