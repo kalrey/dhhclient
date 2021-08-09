@@ -6,31 +6,33 @@ import (
 )
 
 type DHHWrapper struct {
-	client *DHHClient
+	client IDHHClient
 }
 
-func NewDHHWrapper(channelId string, loginId string, password string, ua string) (*DHHWrapper, *DHHError) {
-	client := NewClient(channelId)
+func NewDHHWrapperByCookiesAndCsrf(channelId string, cookies string, csrf string)(*DHHWrapper, *DHHError){
+	client := NewClientV2(channelId, cookies, csrf)
+	if client == nil {
+		return nil, nil
+	}
+
+	err := client.InitClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &DHHWrapper{client}, nil
+}
+
+func NewDHHWrapper(channelId string, loginId string, password string, ua string, bx_ua string) (*DHHWrapper, *DHHError) {
+	client := NewClient(loginId, password, channelId, ua, bx_ua)
 
 	if client == nil {
 		return nil, nil
 	}
 
-	err := client.InitClient(ua)
+	err := client.InitClient()
 	if err != nil {
 		return nil, err
-	}
-
-	// err := client.AccountCheck(loginId)
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	err2 := client.Login(loginId, password)
-
-	if err2 != nil {
-		return nil, err2
 	}
 
 	return &DHHWrapper{client}, nil
